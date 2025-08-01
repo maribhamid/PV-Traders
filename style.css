@@ -212,7 +212,7 @@ button:hover, .view-btn:hover {
 main {
   padding-top: 70px; /* adjust depending on your header height */
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 200px auto;
   padding-left: 15px;
   padding-right: 15px;
 }
