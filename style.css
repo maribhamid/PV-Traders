@@ -67,6 +67,9 @@ header nav a:hover {
   .product-grid {
     grid-template-columns: 1fr;
   }
+  main{
+    margin-top: 200px;
+  }
 }
 
 /* Product Card */
