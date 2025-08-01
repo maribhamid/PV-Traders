@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Cart</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+    <a href="index.html"> <img src="images/logo-transparent-png.png" class="brand-logo" </a>
+  </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="cart.html">Cart</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="cart-container">
+      <h2>Your Shopping Cart</h2>
+      <table id="cart-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody id="cart-items"></tbody>
+      </table>
+
+      <h3 id="total-price">Total: ₹0</h3>
+
+      <h2>Customer Details</h2>
+      <form id="order-form">
+        <label>
+          Name:<br/>
+          <input type="text" id="customer-name" required />
+        </label><br/>
+        <label>
+          Phone Number (with country code):<br/>
+          <input type="tel" id="customer-phone" required placeholder="+1234567890" />
+        </label><br/>
+        <label>
+          Address:<br/>
+          <textarea id="customer-address" required></textarea>
+        </label><br/>
+
+        <button type="submit">Place Order via WhatsApp</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    // Render cart items in table
+    function renderCart() {
+      const cart = getCart();
+      const tbody = document.getElementById('cart-items');
+      tbody.innerHTML = "";
+
+      if (cart.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Your cart is empty.</td></tr>`;
+        document.getElementById('total-price').textContent = "Total: ₹0";
+        return;
+      }
+
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const subtotal = item.price * item.qty;
+        total += subtotal;
+
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+          <td>
+            <img src="${item.image}" alt="${item.name}" style="width:50px;vertical-align:middle;border-radius:4px;margin-right:8px;" />
+            ${item.name}
+          </td>
+          <td>₹${item.price.toFixed(2)}</td>
+          <td>
+            <input type="number" min="1" value="${item.qty}" data-index="${index}" class="qty-update" style="width:60px;" />
+          </td>
+          <td>₹${subtotal.toFixed(2)}</td>
+          <td><button data-index="${index}" class="remove-btn" style="background:#dc3545;">Remove</button></td>
+        `;
+
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('total-price').textContent = `Total: ₹${total.toFixed(2)}`;
+
+      // Attach event listeners for qty update & remove
+      document.querySelectorAll('.qty-update').forEach(input => {
+        input.addEventListener('change', e => {
+          const idx = e.target.dataset.index;
+          let val = parseInt(e.target.value);
+          if (isNaN(val) || val < 1) val = 1;
+          e.target.value = val;
+
+          let cart = getCart();
+          cart[idx].qty = val;
+          saveCart(cart);
+          renderCart();
+        });
+      });
+
+      document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const idx = e.target.dataset.index;
+          let cart = getCart();
+          cart.splice(idx, 1);
+          saveCart(cart);
+          renderCart();
+        });
+      });
+    }
+
+    // On order form submit — send WhatsApp message
+    document.getElementById('order-form').addEventListener('submit', e => {
+      e.preventDefault();
+
+      const cart = getCart();
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+
+      const name = document.getElementById('customer-name').value.trim();
+      const phone = document.getElementById('customer-phone').value.trim();
+      const address = document.getElementById('customer-address').value.trim();
+
+      if (!name || !phone || !address) {
+        alert("Please fill in all customer details.");
+        return;
+      }
+
+      // Construct message text
+      let message = `*New Order from ${name}*\n`;
+      message += `Phone: ${phone}\n`;
+      message += `Address: ${address}\n\n`;
+      message += `Order Details:\n`;
+
+      let total = 0;
+      cart.forEach(item => {
+        const subtotal = item.price * item.qty;
+        total += subtotal;
+        message += `- ${item.name} x${item.qty} = ₹${subtotal.toFixed(2)}\n`;
+      });
+
+      message += `\n*Total: ₹${total.toFixed(2)}*`;
+
+      // Encode message for URL
+      const encodedMessage = encodeURIComponent(message);
+
+      // WhatsApp API URL — replace YOUR_PHONE_NUMBER with your WhatsApp number with country code (no + or 00)
+      const yourNumber = "+919797216212"; // <-- PUT YOUR NUMBER HERE
+
+      const waUrl = `https://wa.me/${yourNumber}?text=${encodedMessage}`;
+
+      // Open WhatsApp link in new tab
+      window.open(waUrl, '_blank');
+
+      // Optional: clear cart and form after ordering
+      localStorage.removeItem('cart');
+      renderCart();
+      e.target.reset();
+    });
+
+    // Initial render
+    window.onload = renderCart;
+  </script>
+</body>
+</html>

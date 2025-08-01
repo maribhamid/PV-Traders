@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PV Traders</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+     <div class="brand">
+    <a href="index.html"> <img src="images/PV Traders.png" class="brand-logo" </a>
+  </div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="cart.html">Cart</a>
+  </nav>
+  </header>
+
+  <main>
+    <section class="product-grid" id="product-grid">
+      <!-- Products loaded here -->
+    </section>
+  </main>
+
+  <script src="products.js"></script>
+  <script src="script.js"></script> <!-- your cart logic script -->
+
+  <script>
+    const grid = document.getElementById('product-grid');
+
+    products.forEach(product => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.dataset.id = product.id;
+      card.dataset.name = product.name;
+      card.dataset.price = product.price;
+      card.dataset.image = product.image;
+
+      card.innerHTML = `
+        <img src="${product.image}" alt="${product.name}" />
+        <h2>${product.name}</h2>
+        <p>₹${product.price.toFixed(2)}</p>
+        <input type="number" min="1" value="1" class="qty-input" aria-label="Quantity for ${product.name}" />
+        <div class="buttons">
+          <button onclick="addToCart(this)">Add to Cart</button>
+          <a href="product.html?id=${product.id}" class="view-btn" aria-label="View details for ${product.name}">View Details</a>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>

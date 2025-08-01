@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product Details - My Online Shop</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f5f5f5;
+    }
+    header {
+      background: lightblue;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 a {
+      color: white;
+      text-decoration: none;
+    }
+    nav a {
+      color: white;
+      margin-left: 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+      padding: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+    #product-image {
+      max-width: 350px;
+      width: 100%;
+      border-radius: 6px;
+      object-fit: contain;
+      background: #f0f0f0;
+      padding: 10px;
+    }
+    #product-details {
+      flex: 1;
+      min-width: 250px;
+    }
+    #product-details h2 {
+      margin-top: 0;
+    }
+    #product-price {
+      font-size: 1.5rem;
+      color: #007bff;
+      font-weight: bold;
+      margin: 10px 0 20px;
+    }
+    #product-description {
+      font-size: 1rem;
+      margin-bottom: 30px;
+    }
+    #product-qty {
+      width: 60px;
+      padding: 6px;
+      font-size: 1rem;
+      margin-right: 15px;
+    }
+    #add-to-cart-btn {
+      background: #007bff;
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #add-to-cart-btn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+    <a href="index.html"> <img src="images/logo-transparent-png.png" class="brand-logo" </a>
+  </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="cart.html">Cart</a>
+    </nav>
+  </header>
+
+  <main>
+    <img id="product-image" src="" alt="Product Image" />
+    <section id="product-details">
+      <h2 id="product-name">Product Name</h2>
+      <p id="product-price">₹0.00</p>
+      <p id="product-description">Product description goes here.</p>
+      <label>
+        Quantity:
+        <input type="number" id="product-qty" min="1" value="1" aria-label="Quantity" />
+      </label>
+      <button id="add-to-cart-btn">Add to Cart</button>
+    </section>
+  </main>
+
+  <script src="products.js"></script>
+  <script src="script.js"></script> <!-- cart functions -->
+
+  <script>
+    function getProductId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
+    }
+
+    function showProduct(product) {
+      document.getElementById('product-image').src = product.image;
+      document.getElementById('product-image').alt = product.name;
+      document.getElementById('product-name').textContent = product.name;
+      document.getElementById('product-price').textContent = `₹${product.price.toFixed(2)}`;
+      document.getElementById('product-description').textContent = product.description;
+    }
+
+    function init() {
+      const id = getProductId();
+      if (!id) {
+        alert('No product selected.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const product = products.find(p => p.id === id);
+      if (!product) {
+        alert('Product not found.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      showProduct(product);
+
+      document.getElementById('add-to-cart-btn').onclick = () => {
+        const qtyInput = document.getElementById('product-qty');
+        let qty = parseInt(qtyInput.value);
+        if (isNaN(qty) || qty < 1) {
+          alert('Please enter a valid quantity.');
+          qtyInput.value = 1;
+          return;
+        }
+
+        let cart = getCart();
+
+        const existingIndex = cart.findIndex(item => item.id === product.id);
+        if (existingIndex > -1) {
+          cart[existingIndex].qty += qty;
+        } else {
+          cart.push({ id: product.id, name: product.name, price: product.price, qty: qty, image: product.image });
+        }
+
+        saveCart(cart);
+        alert(`${product.name} (x${qty}) added to cart!`);
+        qtyInput.value = 1;
+      };
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
